@@ -1,0 +1,284 @@
+#!/usr/bin/perl
+#--------------------------------------------------------------------------------------------
+# PROGRAM NAME : SRC_NG_TRAN_METRICS.pl
+# AUTHOR       : Sandeep Marthala
+# DATE         : 12-DEC-2011
+# PURPOSE      : Automated comparision of two delimited files 
+#---------------------------------------------------------------------------------------------
+
+my ${RVS_SECURITY_FILE}= $ARGV[0];
+my ${BOA_FILE}= $ARGV[1];
+my ${FILE_ARRAY_DETAILS_PARM}=$ARGV[2];
+
+#------------------------------------------------------AUTOMATION for SECURITY MASTER FILE---------------------------------------------------------
+open FILE4, $FILE_ARRAY_DETAILS_PARM or die $!;
+@array_column_name_sm;
+@array_column_position_sm;
+@array_column_extract_val_length_sm;
+$flag_length=0;
+$array_index=0;
+
+while($line = <FILE4>)
+{if ($flag_length == 0 )
+   { chomp($line);@array=split("\,",$line);$l_sm = $array[0]; $flag_length = 1;}
+ else
+   { chomp($line);
+     @array=split("\,",$line);
+	 $array[0] =~ s/^\s+|\s+$//g; 
+	 $array[1] =~ s/^\s+|\s+$//g; 
+	 $array[2] =~ s/^\s+|\s+$//g;
+	
+	 $array_column_name_sm[$array_index]=$array[0];
+	 $array_column_position_sm[$array_index]=$array[1];
+	 $array_index++;
+	} 
+
+}
+
+close FILE4;
+
+
+open FILE6, $FILE_ARRAY_DETAILS_PARM or die $!;
+@array_column_name_sm_print;
+@array_column_position_sm_print;
+$flag_length=0;
+$array_index=0;
+
+while($line = <FILE6>)
+{if ($flag_length == 0 )
+   { chomp($line);@array=split("\,",$line);$l_sm_print = $array[2]; $flag_length = 1;}
+ else
+   { chomp($line);
+     @array=split("\,",$line);
+	 $array[2] =~ s/^\s+|\s+$//g; 
+	 $array[3] =~ s/^\s+|\s+$//g; 	 
+     $array_column_name_sm_print[$array_index]=$array[2];
+	 $array_column_position_sm_print[$array_index]=$array[3];
+	 $array_index++;
+	} 
+
+}
+
+close FILE6;
+
+#------------------------------------------------------AUTOMATION for BOA FILE---------------------------------------------------------
+open FILE5, $FILE_ARRAY_DETAILS_PARM or die $!;
+@array_column_name_gim;
+@array_column_position_gim;
+$flag_length=0;
+$array_index=0;
+
+while($line = <FILE5>)
+{if ($flag_length == 0 )
+   { chomp($line);@array=split("\,",$line);$l_gim = $array[4]; $flag_length = 1;}
+ else
+   { chomp($line);
+     @array=split("\,",$line);
+	 $array[4] =~ s/^\s+|\s+$//g; 
+	 $array[5] =~ s/^\s+|\s+$//g; 	 
+     $array_column_name_gim[$array_index]=$array[4];
+	 $array_column_position_gim[$array_index]=$array[5];
+	 $array_index++;
+	} 
+
+}
+
+close FILE5;
+
+
+open FILE7, $FILE_ARRAY_DETAILS_PARM or die $!;
+@array_column_name_gim_print;
+@array_column_position_gim_print;
+$flag_length=0;
+$array_index=0;
+while($line = <FILE7>)
+{if ($flag_length == 0 )
+   { chomp($line);@array=split("\,",$line);$l_gim_print = $array[6];$flag_length = 1;}
+ else
+   { chomp($line);
+     @array=split("\,",$line);
+	 $array[6] =~ s/^\s+|\s+$//g; 
+	 $array[7] =~ s/^\s+|\s+$//g; 	  
+     $array_column_name_gim_print[$array_index]=$array[6];
+	 $array_column_position_gim_print[$array_index]=$array[7];
+	 $array_index++;
+	} 
+
+}
+
+close FILE7;
+
+#-----------------------------------------------------CREATING HASHES FOR SECURITY MASTER------------------------------------------------------
+
+
+open FILE1, $RVS_SECURITY_FILE or die $!;
+
+
+%HASH_SECURITY_MASTER_AUSI;
+%HASH_SECURITY_MASTER_PRINT_AUSI;
+
+$gs_record_count=0;
+$flag_remove_header=0;
+
+while($line = <FILE1> )
+ {  
+    chomp($line);
+	{
+		@array = split('\,',$line);
+		chomp(@array);		
+		{
+            $gs_record_count++;	
+			$array[3] =~ s/^\s+|\s+$//g;   #CUSIP RVS keys
+			$key0 = $array[3];
+		    $HASH_SECURITY_MASTER_AUSI{$key0}= $key0;  
+			$i=0;
+			while($i<$l_sm)
+           { 
+		 
+		 if ($array_column_name_sm[$i] eq	"MTG_PAY_DELAY_BB")
+		 {$array[$array_column_position_sm[$i]] =~ s/\DAYS//g; }
+		 
+		   $HASH_SECURITY_MASTER_AUSI{$key0}=$HASH_SECURITY_MASTER_AUSI{$key0}.",".$array[$array_column_position_sm[$i]];
+		    $i = $i +1 ;
+		   }
+		   $i=0;
+           $HASH_SECURITY_MASTER_PRINT_AUSI{$key0}= $array[$array_column_position_sm_print[$i++]];			
+			while($i<$l_sm_print)
+           { $HASH_SECURITY_MASTER_PRINT_AUSI{$key0}=$HASH_SECURITY_MASTER_PRINT_AUSI{$key0}.",".$array[$array_column_position_sm_print[$i++]]; }
+		 
+		}          
+	}		
+		
+}
+ 
+close FILE1;
+
+
+
+
+#-------------------------------------------------------------CREATING HASHES FOR BOA------------------------------------------------
+
+open FILE2, $BOA_FILE or die $!;
+open FILE_EXP, ">MISSING_SECURITY.txt" or die $!;
+
+ 
+%HASH_GIM_AUSI;         # HASH FOR CUSIP RECORDS
+%HASH_GIM_SEDOL;        # HASH FOR SEDOL RECORDS
+
+%HASH_GIM_AUSI_PRINT;         # HASH FOR CUSIP RECORDS
+%HASH_GIM_SEDOL_PRINT;        # HASH FOR SEDOL RECORDS
+
+
+$flag_remove_header=0;
+$count_total=0;
+$count_match=0;
+$count_mismatch=0;
+
+
+while($line = <FILE2> )
+ {
+ $count_total++;
+			chomp($line);
+			@array = split('\,',$line);
+			chomp(@array);
+			$array[1] =~ s/^\s+|\s+$//g;   # CUSIP
+		
+			
+ 		  if(exists $HASH_SECURITY_MASTER_AUSI{$array[1]} ) 
+		  { $count_match++;
+			$i=0;  $HASH_GIM_AUSI{$array[1]}=$array[1];
+			while($i<$l_gim)
+           {  $HASH_GIM_AUSI{$array[1]}=$HASH_GIM_AUSI{$array[1]}.",".$array[$array_column_position_gim[$i++]]; }
+		   
+		    $i=0; $HASH_GIM_AUSI_PRINT{$array[1]}=$array[$array_column_position_gim_print[$i++]];
+			while($i<$l_gim_print)
+           {  $HASH_GIM_AUSI_PRINT{$array[1]}=$HASH_GIM_AUSI_PRINT{$array[1]}.",".$array[$array_column_position_gim_print[$i++]]; }
+			
+			
+		  }
+    		else
+				{
+				print FILE_EXP ${line};
+				print FILE_EXP "\n";
+			    $count_mismatch++;
+				}
+}
+
+close FILE2;
+close FILE_EXP;
+
+#----------------------------------------------------------PRINTING THE COMPARISION REPORT-----------------------------------------------
+
+use Scalar::Util qw(looks_like_number);
+#print "\n  DATE OF RUNNING OF REPORT : ".scalar localtime;
+#print "\n  TOTAL BLOOMBERG RECORD COUNT : ".$gs_record_count;
+#print "\n  TOTAL GIM RECORD COUNT : ".$count_total;
+print "\n  TOTAL MATCHING GIM RECORD COUNT : ".$count_match;
+print "\n  TOTAL MISMATCHING GIM RECORD COUNT : ".$count_mismatch;
+#print "\n  MISMATCH + MATCH : ".($count_match+$count_mismatch)."\n";
+
+
+open FILE3, ">BLOOMBERG_GIM_REPORT.csv" or die $!;
+
+$i=0;
+$heading = "CUSIP";
+
+while ($i<$l_gim_print)
+{ $heading = $heading.",".$array_column_name_gim_print[$i];
+
+  $i++;
+}
+
+$i=0;
+while ($i<$l_sm_print)
+{ $heading = $heading.",".$array_column_name_sm_print[$i];
+  $i++;
+}
+
+
+$i=0;
+while ($i<$l_sm)
+{$heading = $heading.",".$array_column_name_gim[$i].",".$array_column_name_sm[$i].","."DISCP_COMMENTS";
+$i++;}
+
+print FILE3 $heading."\n";
+while (($key, $value) = each(%HASH_GIM_AUSI))
+{ 
+  @array_sm=split('\,',$HASH_SECURITY_MASTER_AUSI{$key});    # array_sm == ARRAY_FOR_SECURITY_MASTER_RECORD
+  @array_gim=split('\,',$HASH_GIM_AUSI{$key});          # array_gim == ARRAY_FOR_GIM_AUSI_RECORD
+  
+     print FILE3  $key.",".$HASH_GIM_AUSI_PRINT{$key}.",".$HASH_SECURITY_MASTER_PRINT_AUSI{$key};
+	 
+	 
+	 
+     $i=1;
+	 
+	 while($i<($l_sm+1))
+	  {
+	 
+	 $array_gim[$i] =~ s/^\s+|\s+$//g; $array_sm[$i] =~ s/^\s+|\s+$//g;
+
+	 $array_column_name_sm[$i-1] =~ s/^\s+|\s+$//g; 
+	
+	 if ( looks_like_number($array_gim[$i]) && looks_like_number($array_sm[$i]) )
+	 {
+	  print FILE3  ",".$array_gim[$i].",".$array_sm[$i];if($array_sm[$i] == $array_gim[$i]){print FILE3 ","."MATCHING";} else {print FILE3 ","."MISMATCH";}
+     }
+	 else
+	 {
+	  print FILE3  ",".$array_gim[$i].",".$array_sm[$i];if($array_sm[$i] eq $array_gim[$i]){print FILE3 ","."MATCHING";} else {print FILE3 ","."MISMATCH";}
+     }
+	 
+	 $i++;
+	 }
+	print FILE3 "\n";
+  
+}
+
+
+
+
+
+
+
+

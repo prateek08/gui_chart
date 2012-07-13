@@ -1,0 +1,52 @@
+<%= provide(:title, "upload success") %>
+<div>
+<%	File.open('public\output\perl_output.txt') do |s| %>
+	<% s.readline %>
+ 	<p class="alert alert-success"><%= line = s.readline %></p>
+ 	<% tmp = line.scan(/\d+/) %>
+ 	<% match = tmp.map{|tmp| tmp.to_i}  %>
+ 	<% match.class %>
+ 	<% $a = match[0] %>
+ 	<p class="alert alert-error"><%= line = s.readline %></p>
+ 	<% tmp = line.scan(/\d+/) %>
+ 	<% mismatch = tmp.map{|tmp| tmp.to_i} %> 
+ 	<% $b = mismatch[0] %>
+ 	<% end %>
+
+  <%= link_to "View Mismatch","/data_files/table" %>
+  <br>
+  <%= link_to "Input parameters","/data_files/parameters" %>
+
+</div>
+
+
+
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      
+      function drawChart() {
+      var match = <%= $a %>
+      var mismatch = <%= $b %>
+            var data = google.visualization.arrayToDataTable([
+           ['match or mismatch', 'total number of occurences'],
+           ['match ', match],
+           ['mismatch ', mismatch],
+            ]);
+
+        var options = {
+          title: 'Report'
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+  </body>
+</html>

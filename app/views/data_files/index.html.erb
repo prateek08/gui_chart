@@ -1,0 +1,15 @@
+<% provide(:title , "Upload") %>
+<div class = "left hero-unit">
+	<div class= "row">
+	<div class="span6 offset1">
+	
+	<%= form_for :data_file, :html => {:multipart => true} do |f| %>
+ 	file 1:<%= f.file_field :src %>
+ 	file 2:<%= f.file_field :dest %>
+ 	<%#= f.file_field :parameter %>
+ 	perl script:<%= f.file_field :perl_script %>
+  	<%= f.submit "Next" %>	
+	<% end %>
+	</div>
+</div>
+</div>

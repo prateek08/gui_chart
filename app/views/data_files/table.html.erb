@@ -1,0 +1,36 @@
+<% provide(:title, "table") %>
+
+
+<% tmp = 1 %>
+
+			
+		<% f = File.open('BLOOMBERG_GIM_REPORT.csv', "r") %>
+		<% line = f.readline %>
+		<% header = line.split(',') %>
+		<% f.each_line do |line| %>
+		<% tmp = 0 %>
+		<% counter = 7 %>
+			<table class="table table-striped table-bordered table-condensed">
+			<tbody>
+			<% if ( tmp == 1 ) %>
+				<% tmp = 0 %>
+			<% else %>
+				<%	 row_data = line.split(',') %>
+				<% while 	(counter + 3) < row_data.length %>
+					<% 	if (row_data[counter + 3] == "MISMATCH" && (counter + 3) < row_data.length ) %>
+						<tr>
+							<td>
+								<%= row_data[counter +1] %>
+							</td>
+							<td>
+								<%= row_data[counter + 2] %> 
+							</td>
+						</tr>
+					<% end %>
+					<% counter = counter + 3 %>
+				<% end %>
+			<% end %>
+	
+		</tbody>	
+		</table>
+	<% end %>

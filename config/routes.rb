@@ -1,6 +1,17 @@
 GuiChart::Application.routes.draw do
   get "static_pages/home"
   root to: "static_pages#home"
+
+  match "/data_files/parameters", to: "data_files#parameters"
+  match "/data_files/table", to: "data_files#table"
+  match "/data_files/accept_parameters", to: "data_files#accept_parameters"
+  match "/data_files/primary_keys", to: "data_files#primary_keys"
+  resources :data_files
+  #match '/run', to: 'data_files#file_upload'
+  #match "/run", to: "data_files#run", as: :run
+  #match "/upload", to: "data_files#upload"
+  #match "/index", to: "data_files#index", as: :index
+  
   
 
   # The priority is based upon order of creation:

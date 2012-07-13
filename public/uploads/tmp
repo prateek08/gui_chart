@@ -1,0 +1,1 @@
+perl.exe "C:/Sites/gui_chart/public/uploads/script" "C:/Sites/gui_chart/public/uploads/file1" "C:/Sites/gui_chart/public/uploads/file2" "1,2,3,4,5" "1,3,4" "C:/Sites/gui_chart/public/uploads/params_file" > ".\public\output\perl_output.txt"

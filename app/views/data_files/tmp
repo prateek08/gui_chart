@@ -1,0 +1,21 @@
+<% provide(:title, "parameters") %>
+
+<div class = "span3 ">
+<%# count = 0 %>
+
+<%# @header.each do |header| %>
+ <%#= text_field_tag 'header[]', header %>
+  <%# count = count + 1 %>
+<%# end %>
+</div>
+<div class = "span3"  >
+<%= form_for :data_files, :url => {:controller => "data_files", :action => "accept_parameters"} do |f| %>
+	<% count = 0 %>
+	<% @header.each do |header| %>
+	<%= header %>
+	<input class="span3" data-provide="typeahead" data-items="4" data-source="<%= @map_header %>" type="text" id="data_files_<%=header%>" name="data_files[<%=header%>]">
+	<% end %>
+	<%= f.submit "submit parameters" %>
+<% end %>
+
+</div>
